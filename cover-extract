@@ -1,0 +1,120 @@
+#!/bin/bash
+
+UNRAR=/usr/bin/unrar-nonfree
+UNZIP=/usr/bin/unzip
+TMPDIR=/tmp
+
+IMGEXT="bmp gif jpg png"
+
+
+
+NOCOLOR=0
+
+# Usage: color shade
+function color {
+	# Are we in Cron?
+	if [ ! -t 0 -o $NOCOLOR = 1 ]; then return 1; fi
+	case $1 in
+		off|OFF)       echo -n '[0m';;
+		red|RED)       echo -n '[1;31m';;
+		yellow|YELLOW) echo -n '[1;33m';;
+		green|GREEN)   echo -n '[1;32m';;
+		blue|BLUE)     echo -n '[1;34m';;
+		bell|BELL)     echo -n '';;
+		*)             ;;
+	esac
+}
+
+# Usage: error "String to display"
+error() {
+	color BELL;color RED
+	printf "%s: %s\n" $"ERROR" "$1"
+	color OFF
+}
+
+# Usage: warning "String to display"
+warning() {
+	color YELLOW
+	printf "%s: %s\n" $"WARNING" "$1"
+	color OFF
+}
+
+info() {
+	color BLUE
+	printf "%s: %s\n" $"INFO" "$1"
+	color OFF
+}
+
+
+infile="$1"
+filename="${infile##*/}"
+filepath="${infile%/*}"
+fileext="${infile##*.}"
+filebase="${filename%.*}"
+
+echo -n "Checking file "; color YELLOW; echo "$infile"; color OFF
+
+for tryext in $IMGEXT; do
+	if [ -e "$filepath/$filebase.$tryext" ]; then
+		echo -n "An external cover file already exists ("; color GREEN; echo -n "$filepath/$filebase.$tryext"; color OFF; echo "). Skipping cover generation."
+		exit 0
+	fi
+done
+
+filelist=""
+if [ "$fileext" == "cbr" ]; then
+	filelist=$($UNRAR vb "$infile" | sort)
+else 
+	if [ "$fileext" == "cbz" ]; then
+		filelist=$($UNZIP -l "$infile" | cut -c 31- | head -n -2 | tail -n +4 | sort)
+	else
+		error "Unknown extension $fileext"
+		exit 1
+	fi
+fi
+
+
+oldIFS=$IFS
+IFS=$'\n'
+
+for file in $filelist; do
+	IFS=$oldIFS
+	echo -n "Checking file "; color YELLOW; echo -n "$file"; color OFF; echo -n "..."
+	filetryext="${file##*.}"
+
+	is_img=0
+	for tryext in $IMGEXT; do
+		if [ "$tryext" == "$filetryext" ]; then
+			is_img=1
+		fi
+	done
+
+	if [ "$is_img" -gt 0 ]; then
+		color GREEN; echo " Cover found!"; color OFF
+		if [ "$fileext" == "cbr" ]; then
+			$UNRAR e -y "$infile" "$file" "$TMPDIR"
+		else
+			$UNZIP -o -j -d "$TMPDIR" "$infile" "$file"
+		fi
+		outfile=$TMPDIR/${file##*/}
+
+		if [ ! -e "$outfile" ]; then
+			error "Cover file $outfile not found!"
+			exit 1
+		fi
+		echo -n "Moving file do destination folder..."
+		if mv -f "$outfile" "$filepath/$filebase.${file##*.}" > /dev/null 2>&1; then
+			color GREEN; echo " Done!"; color OFF
+			exit 0
+		fi
+		color RED; echo " Failed!"; color OFF
+		exit 1
+	else
+		echo " Skipping"
+	fi
+
+done
+
+IFS=$oldIFS
+
+
