@@ -23,9 +23,6 @@ UNZIP=/usr/bin/unzip
 TMPDIR=/tmp
 
 IMGEXT="bmp gif jpg png"
-
-
-
 NOCOLOR=0
 
 # Usage: color shade
@@ -69,6 +66,12 @@ filename="${infile##*/}"
 filepath="${infile%/*}"
 fileext="${infile##*.}"
 filebase="${filename%.*}"
+
+echo "...${filepath}..."
+
+if [ "$filepath" == "$infile" ]; then
+	filepath="."
+fi
 
 echo -n "Checking file "; color YELLOW; echo "$infile"; color OFF
 
@@ -120,7 +123,7 @@ for file in $filelist; do
 			error "Cover file $outfile not found!"
 			exit 1
 		fi
-		echo -n "Moving file do destination folder..."
+		echo -n "Moving file to destination folder ($outfile -> $filepath/$filebase.${file##*.})..."
 		if mv -f "$outfile" "$filepath/$filebase.${file##*.}" > /dev/null 2>&1; then
 			color GREEN; echo " Done!"; color OFF
 			exit 0
