@@ -22,8 +22,7 @@ UNRAR=/usr/bin/unrar-nonfree
 UNZIP=/usr/bin/unzip
 TMPDIR=/tmp
 
-#IMGEXT="bmp gif jpg png"
-IMGEXT="jpg"
+IMGEXT="bmp gif jpg png"
 NOCOLOR=0
 
 # Usage: color shade
@@ -85,10 +84,10 @@ done
 
 filelist=""
 if [ "$fileext" == "cbr" ]; then
-	filelist=$($UNRAR vb "$infile" | sort)
+	filelist=$($UNRAR vb "$infile" | LC_ALL=C sort)
 else 
 	if [ "$fileext" == "cbz" ]; then
-		filelist=$($UNZIP -l "$infile" | cut -c 31- | head -n -2 | tail -n +4 | sort)
+		filelist=$($UNZIP -l "$infile" | cut -c 31- | head -n -2 | tail -n +4 | LC_ALL=C sort)
 	else
 		error "Unknown extension $fileext"
 		exit 1
