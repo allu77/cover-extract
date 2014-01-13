@@ -43,7 +43,7 @@ function color {
 # Usage: error "String to display"
 error() {
 	color BELL;color RED
-	printf "%s: %s\n" $"ERROR" "$1"
+	printf "%s: %s\n" $"ERROR" "$1" >&2
 	color OFF
 }
 
