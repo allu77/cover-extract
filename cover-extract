@@ -94,9 +94,10 @@ else
 	fi
 fi
 
-
 oldIFS=$IFS
 IFS=$'\n'
+
+cover_found=0
 
 for file in $filelist; do
 	IFS=$oldIFS
@@ -112,6 +113,7 @@ for file in $filelist; do
 
 	if [ "$is_img" -gt 0 ]; then
 		color GREEN; echo " Cover found!"; color OFF
+		cover_found=1
 		if [ "$fileext" == "cbr" ]; then
 			$UNRAR e -y "$infile" "$file" "$TMPDIR"
 		else
@@ -135,7 +137,11 @@ for file in $filelist; do
 	fi
 
 done
-
 IFS=$oldIFS
+
+if [ "$cover_found" -eq 0 ]; then
+	error "Can't extract cover from file"
+	exit 1
+fi
 
 
