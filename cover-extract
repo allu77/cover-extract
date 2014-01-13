@@ -140,7 +140,7 @@ done
 IFS=$oldIFS
 
 if [ "$cover_found" -eq 0 ]; then
-	error "Can't extract cover from file"
+	error "Can't extract cover from file $infile"
 	exit 1
 fi
 
