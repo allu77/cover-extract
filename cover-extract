@@ -67,8 +67,6 @@ filepath="${infile%/*}"
 fileext="${infile##*.}"
 filebase="${filename%.*}"
 
-echo "...${filepath}..."
-
 if [ "$filepath" == "$infile" ]; then
 	filepath="."
 fi
