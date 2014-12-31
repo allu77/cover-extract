@@ -22,7 +22,7 @@ UNRAR=/usr/bin/unrar-nonfree
 UNZIP=/usr/bin/unzip
 TMPDIR=/tmp
 
-IMGEXT="bmp gif jpg png"
+IMGEXT="bmp BMP gif GIF jpg JPG jpeg JPEG png PNG"
 NOCOLOR=0
 
 # Usage: color shade
